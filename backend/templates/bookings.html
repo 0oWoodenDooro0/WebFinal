@@ -1,74 +1,66 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Hotel Booking List</title>
-    <!-- Bootstrap CSS CDN -->
+    <title>Bookings</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <!-- jQuery UI CSS for Datepicker -->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="container mt-5">
 {% include 'layout/menu.html' %}
+
 <div class="content">
     <h1 class="mb-4">Booking List</h1>
-    <table class="table table-striped table-hover table-bordered list">
+    <table class="table table-striped table-hover table-bordered">
         <thead class="thead-dark">
         <tr>
             <th>Booking ID</th>
             <th>Guest Name</th>
-            <th>Room Detail</th>
-            <th>Room Price</th>
+            <th>Room Number</th>
             <th>Check-in Date</th>
             <th>Check-out Date</th>
-            <th>Contact</th>
-            <th>Detail</th>
-            <th>Action</th>
+            <th>Total Price</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
         {% for booking in bookings %}
-        <tr id="booking-{{ booking.booking_id }}">
+        <tr id="booking-{{ booking.id }}">
             <td>{{ booking.id }}</td>
             <td>{{ booking.guest.name }}</td>
-            <td>{{ booking.room.detail }}</td>
-            <td>{{ booking.room.price }}</td>
+            <td>{{ booking.room.id }}</td>
             <td>
-                <input type="text" style="width: 120px;"
-                       class="form-control datepicker" value="{{ booking.check_in_date }}"
-                       id="check-in-{{ booking.booking_id }}">
+                <input type="text" style="width: 120px;" class="form-control datepicker"
+                       value="{{ booking.check_in_date }}" id="check-in-{{ booking.id }}">
             </td>
             <td>
-                <input type="text" style="width: 120px;"
-                       class="form-control datepicker" value="{{ booking.check_out_date }}"
-                       id="check-out-{{ booking.booking_id }}">
+                <input type="text" style="width: 120px;" class="form-control datepicker"
+                       value="{{ booking.check_out_date }}" id="check-out-{{ booking.id }}">
             </td>
-            <td>{{ booking.guest.contact }}</td>
-            <td>{{ booking.detail }}</td>
+            <td>{{ booking.amount }}</td>
             <td>
-                <button class="btn btn-danger cancel-btn btn-sm"
-                        data-id="{{ booking.booking_id }}">Cancel
-                </button>
+                <button class="btn btn-danger cancel-btn btn-sm" data-id="{{ booking.id }}">Cancel</button>
             </td>
         </tr>
         {% endfor %}
         </tbody>
     </table>
 </div>
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<!-- jQuery and jQuery UI Scripts -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script>
     $(document).ready(function () {
         $('.cancel-btn').click(function () {
             const bookingId = $(this).data('id');
             console.log("Cancel, bookingId:", bookingId);
+
             if (confirm("Are you sure you want to cancel this booking?")) {
                 $.ajax({
                     url: '/cancel_booking',
                     method: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify({booking_id: bookingId}),
+                    data: JSON.stringify({id: bookingId}),
                     success: function (response) {
                         // Remove the booking row from the table
                         $('#booking-' + bookingId).remove();
@@ -76,19 +68,18 @@
                     },
                     error: function (xhr, status, error) {
                         console.error("Error: " + error);
-                        alert("An error occurred while canceling thebooking.");
+                        alert("An error occurred while canceling the booking.");
                     }
                 });
             }
         });
+
         $('.datepicker').datepicker({
             dateFormat: 'yy-mm-dd',
             onSelect: function (dateText, inst) {
                 const bookingId = this.id.split('-').pop();
-                const dateType = this.id.includes('check-in') ?
-                    'check_in_date' : 'check_out_date';
-                console.log("Update, bookingId:", bookingId, ", dateType:",
-                    dateType);
+                const dateType = this.id.includes('check-in') ? 'check_in_date' : 'check_out_date';
+                console.log("Update, bookingId:", bookingId, ", dateType:", dateType);
 
                 fetch(`/update_booking_date`, {
                     method: 'POST',
@@ -104,6 +95,7 @@
                     .then(response => response.json())
                     .then(data => {
                         console.log(data);
+                        window.location.reload();
                     })
                     .catch(error => console.error('Error:', error));
             }

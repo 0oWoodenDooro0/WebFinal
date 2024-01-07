@@ -20,6 +20,7 @@ class Booking(db.Model):
     check_in_date = db.Column(db.Date)
     check_out_date = db.Column(db.Date)
     detail = db.Column(db.String(255))
+    amount = db.Column(db.Integer)
     guest = db.relationship('Guest', backref='booking')
     room = db.relationship('Room', backref='booking')
 
@@ -35,7 +36,7 @@ class Room(db.Model):
     __tablename__ = 'room'
     id = db.Column(db.String(10), primary_key=True)
     max_guests = db.Column(db.Integer)
-    price = db.Column(db.Integer)
+    price_per_day = db.Column(db.Integer)
     detail = db.Column(db.String(255))
 
 
@@ -86,8 +87,14 @@ def update_booking_date():
                 booking.check_in_date = datetime.strptime(new_date, '%Y-%m-%d').date()
             elif date_type == 'check_out_date':
                 booking.check_out_date = datetime.strptime(new_date, '%Y-%m-%d').date()
-            db.session.commit()
-            return jsonify({"status": "success", "message": "Booking date updated"})
+            if booking.check_in_date < booking.check_out_date:
+                days = (booking.check_out_date - booking.check_in_date).days
+                price = Room.query.filter_by(id=booking.room_id).first().price_per_day
+                booking.amount = price * days
+                db.session.commit()
+                return jsonify({"status": "success", "message": "Booking date updated"})
+            else:
+                return jsonify({"status": "error", "message": "Booking date not correct"}), 404
         else:
             return jsonify({"status": "error", "message": "Booking not found"}), 404
     except Exception as e:
@@ -95,5 +102,19 @@ def update_booking_date():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+# Route to show the guest list
+@app.route('/guests')
+def guests():
+    guests_query = Guest.query.order_by('id').all()
+    return render_template('guests.html', guests=guests_query)
+
+
+# Route to show the room list
+@app.route('/rooms')
+def rooms():
+    rooms_query = Room.query.order_by('id').all()
+    return render_template('rooms.html', rooms=rooms_query)
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
