@@ -7,7 +7,7 @@ from gevent.pywsgi import WSGIServer
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'YourSecretKey'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://postgresql:8r5Z3QBu8o1TmAYdu2MreBix2OdRC8rv/postgresql_foa8'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgresql:8r5Z3QBu8o1TmAYdu2MreBix2OdRC8rv@dpg-cmd616021fec73d0hf7g-a/postgresql_foa8'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
