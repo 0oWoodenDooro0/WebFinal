@@ -1,13 +1,15 @@
+import os
+
 from flask import Flask, render_template, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
+from gevent.pywsgi import WSGIServer
 from wtforms import StringField, SubmitField, DateField, SelectField
 from wtforms.validators import DataRequired, ValidationError
-from gevent.pywsgi import WSGIServer
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'YourSecretKey'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgresql:8r5Z3QBu8o1TmAYdu2MreBix2OdRC8rv@dpg-cmd616021fec73d0hf7g-a/postgresql_foa8'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
