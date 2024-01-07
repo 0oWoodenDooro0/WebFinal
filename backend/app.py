@@ -2,6 +2,7 @@ from datetime import datetime
 
 from flask import Flask, render_template, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+from gevent.pywsgi import WSGIServer
 
 app = Flask(__name__)
 # Configure the SQLAlchemy part of the app instance
@@ -117,4 +118,5 @@ def rooms():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    server = WSGIServer(('0.0.0.0', 5001), app)
+    server.serve_forever()

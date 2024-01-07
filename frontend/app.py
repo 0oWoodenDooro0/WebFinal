@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, DateField, SelectField
 from wtforms.validators import DataRequired, ValidationError
+from gevent.pywsgi import WSGIServer
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'YourSecretKey'
@@ -114,4 +115,5 @@ def booking():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    server = WSGIServer(('0.0.0.0', 5000), app)
+    server.serve_forever()
