@@ -9,6 +9,7 @@ from wtforms.validators import DataRequired, ValidationError
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'YourSecretKey'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/postgres'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -52,12 +53,10 @@ class BookingForm(FlaskForm):
 class GuestForm(FlaskForm):
     guest_name = StringField('Guest Name', validators=[DataRequired()])
     contact_info = StringField('Contact Information', validators=[DataRequired()])
-    submit = SubmitField('Book Now')
 
 
 class RoomForm(FlaskForm):
-    detail = SelectField('Room Number', validators=[DataRequired()])
-    submit = SubmitField('Book Now')
+    type = SelectField('Room Number', validators=[DataRequired()])
 
 
 @app.route('/')
@@ -65,47 +64,27 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/room', methods=['GET', 'POST'])
-def room():
-    form = RoomForm()
-    rooms = Room.query.order_by("id").all()
-    form.detail.choices = [(room.id, room.detail) for room in rooms]
-    if form.validate_on_submit():
-        global room_form
-        room_form = form
-        return redirect(url_for('guest'))
-
-    return render_template('room.html', form=form)
-
-
-@app.route('/guest', methods=['GET', 'POST'])
-def guest():
-    form = GuestForm()
-    if form.validate_on_submit():
-        global guest_form
-        guest_form = form
-        return redirect(url_for('booking'))
-
-    return render_template('guest.html', form=form)
-
-
 @app.route('/booking', methods=['GET', 'POST'])
 def booking():
-    form = BookingForm()
+    room_form = RoomForm()
+    rooms = Room.query.order_by("id").all()
+    room_form.type.choices = [(room.id, room.detail) for room in rooms]
+    guest_form = GuestForm()
+    booking_form = BookingForm()
 
-    if form.validate_on_submit():
+    if booking_form.validate_on_submit():
         new_guest = Guest(name=guest_form.guest_name.data, contact=guest_form.contact_info.data)
         db.session.add(new_guest)
         db.session.flush()
 
-        days = (form.check_out_date.data - form.check_in_date.data).days
-        price = Room.query.filter_by(id=room_form.detail.data).first().price_per_day
+        days = (booking_form.check_out_date.data - booking_form.check_in_date.data).days
+        price = Room.query.filter_by(id=room_form.type.data).first().price_per_day
         new_booking = Booking(
             guest_id=new_guest.id,
-            room_id=room_form.detail.data,
-            check_in_date=form.check_in_date.data,
-            check_out_date=form.check_out_date.data,
-            detail=form.detail.data,
+            room_id=room_form.type.data,
+            check_in_date=booking_form.check_in_date.data,
+            check_out_date=booking_form.check_out_date.data,
+            detail=booking_form.detail.data,
             amount=price * days
         )
         db.session.add(new_booking)
@@ -113,7 +92,7 @@ def booking():
 
         return redirect(url_for('index'))
 
-    return render_template('booking.html', form=form)
+    return render_template('booking.html', room_form=room_form, guest_form=guest_form, booking_form=booking_form)
 
 
 if __name__ == '__main__':

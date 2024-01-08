@@ -1,37 +1,72 @@
 <html lang="en">
-    <head>
-        <!-- [existing head content] -->
-        <title>Hotel Booking</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    </head>
-    <body>
-        <div class="container">
-            <h2>Book a Room</h2>
-            <form method="post">
-                {{ form.hidden_tag() }}
-                <div class="form-group">
-                    {{ form.check_in_date.label }} {{ form.check_in_date(class="form-control") }}
-                </div>
-                <div class="form-group">
-                    {{ form.check_out_date.label }}
-                    {% if form.check_out_date.errors %}
-                        {{ form.check_out_date(class="form-control is-invalid") }}
-                        {% for error in form.check_out_date.errors %}
-                        <div class="invalid-feedback">
-                            {{ error }}
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        {{ form.check_out_date(class="form-control") }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.detail.label }} {{ form.detail(class="form-control") }}
-                </div>
-                <div class="form-group">
-                    {{ form.submit(class="btn btn-primary") }}
-                </div>
-            </form>
+<head>
+    <!-- [existing head content] -->
+    <title>Hotel Booking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="{{ url_for('static', filename='script.js')}}"></script>
+</head>
+<body>
+<div class="container">
+    <h2>Book a Room</h2>
+    <form method="post" id="form">
+        <div class="tab">
+            {{ room_form.hidden_tag() }}
+            <div class="form-group">
+                {{ room_form.type.label }} {{ room_form.type(class="form-control") }}
+            </div>
         </div>
-    </body>
+        <div class="tab">
+            {{ guest_form.hidden_tag() }}
+            <div class="form-group">
+                {{ guest_form.guest_name.label }} {{ guest_form.guest_name(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ guest_form.contact_info.label }} {{ guest_form.contact_info(class="form-control") }}
+            </div>
+        </div>
+        <div class="tab">
+            {{ booking_form.hidden_tag() }}
+            <div class="form-group">
+                {{ booking_form.check_in_date.label }} {{ booking_form.check_in_date(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ booking_form.check_out_date.label }}
+                {% if booking_form.check_out_date.errors %}
+                {{ booking_form.check_out_date(class="form-control is-invalid") }}
+                {% for error in booking_form.check_out_date.errors %}
+                <div class="invalid-feedback">
+                    {{ error }}
+                </div>
+                {% endfor %}
+                {% else %}
+                {{ booking_form.check_out_date(class="form-control") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ booking_form.detail.label }} {{ booking_form.detail(class="form-control") }}
+            </div>
+        </div>
+        <div style="overflow:auto;">
+            <div style="float:left;">
+                <button type="button" id="prevBtn" onclick="nextPrev(-1)">Previous</button>
+            </div>
+            <div style="float:right;">
+                <button type="button" id="nextBtn" onclick="nextPrev(1)">Next</button>
+            </div>
+        </div>
+        <div id="submit">
+            {{ booking_form.submit(class="btn btn-primary") }}
+        </div>
+        <div style="text-align:center;margin-top:40px;">
+            <span class="step"></span>
+            <span class="step"></span>
+            <span class="step"></span>
+        </div>
+    </form>
+</div>
+<script>
+    showTab(currentTab)
+</script>
+</body>
 </html>
