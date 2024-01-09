@@ -3,8 +3,6 @@
 
 ## Team Members
 
-------
-
 * 111590017 葉洧辰
 * 109360220馮偉翔
 * 111590049林竣堂
@@ -13,7 +11,6 @@
 
 ## Project Introduction
 
-------
 ### Functionalities
 + Hotel Frontend Website with Booking Feature
     + Design Elements:
