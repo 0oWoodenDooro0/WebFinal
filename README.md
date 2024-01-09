@@ -60,6 +60,5 @@
   - 
 ## Database Schema
 
-----
 <img src="https://i.imgur.com/wSgRATm.jpg"   width="400" height="350" />
 
