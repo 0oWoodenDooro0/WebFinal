@@ -7,6 +7,7 @@ from gevent.pywsgi import WSGIServer
 
 app = Flask(__name__)
 # Configure the SQLAlchemy part of the app instance
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/postgres'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Create the SQLAlchemy db instance
@@ -58,8 +59,7 @@ def bookings():
 @app.route('/cancel_booking', methods=['POST'])
 def cancel_booking():
     data = request.get_json()
-    booking_id = data.get('booking_id')
-    print(f"booking_id: {booking_id}")
+    booking_id = data.get('id')
 
     try:
         booking = Booking.query.get(booking_id)
