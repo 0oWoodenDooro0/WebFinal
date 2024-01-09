@@ -11,7 +11,7 @@
             <div class="bs-stepper">
                 <div class="bs-stepper-header">
                     <!-- your steps here -->
-                    <div class="step">
+                    <div class="step active">
                         <button class="step-trigger pe-none">
                             <span class="bs-stepper-circle">1</span>
                             <span class="bs-stepper-label">Select Room Type</span>
@@ -25,7 +25,7 @@
                         </button>
                     </div>
                     <div class="line"></div>
-                    <div class="step active">
+                    <div class="step">
                         <button class="step-trigger pe-none">
                             <span class="bs-stepper-circle">3</span>
                             <span class="bs-stepper-label">Confirm Dates</span>
@@ -33,27 +33,11 @@
                     </div>
                 </div>
             </div>
-            <h2>Confirm Dates</h2>
+            <h2>Select Room Type</h2>
             <form method="post">
                 {{ form.hidden_tag() }}
                 <div class="form-group">
-                    {{ form.check_in_date.label }} {{ form.check_in_date(class="form-control") }}
-                </div>
-                <div class="form-group">
-                    {{ form.check_out_date.label }}
-                    {% if form.check_out_date.errors %}
-                        {{ form.check_out_date(class="form-control is-invalid") }}
-                        {% for error in form.check_out_date.errors %}
-                        <div class="invalid-feedback">
-                            {{ error }}
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        {{ form.check_out_date(class="form-control") }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.detail.label }} {{ form.detail(class="form-control") }}
+                    {{ form.type.label }} {{ form.type(class="form-control") }}
                 </div>
                 <div class="form-group">
                     {{ form.submit(class="btn btn-primary") }}

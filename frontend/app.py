@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from gevent.pywsgi import WSGIServer
@@ -53,10 +53,12 @@ class BookingForm(FlaskForm):
 class GuestForm(FlaskForm):
     guest_name = StringField('Guest Name', validators=[DataRequired()])
     contact_info = StringField('Contact Information', validators=[DataRequired()])
+    submit = SubmitField('Next')
 
 
 class RoomForm(FlaskForm):
     type = SelectField('Room Number', validators=[DataRequired()])
+    submit = SubmitField('Next')
 
 
 @app.route('/')
@@ -64,27 +66,42 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/room', methods=['GET', 'POST'])
+def room():
+    form = RoomForm()
+    rooms = Room.query.order_by("id").all()
+    form.type.choices = [(room.id, room.detail) for room in rooms]
+    if form.validate_on_submit():
+        return redirect(url_for('guest', room_id=form.type.data))
+
+    return render_template('room.html', form=form)
+
+
+@app.route('/guest', methods=['GET', 'POST'])
+def guest():
+    form = GuestForm()
+    if form.validate_on_submit():
+        return redirect(url_for('booking', room_id=request.args.get('room_id'), guest_name=form.guest_name.data,
+                                contact_info=form.contact_info.data))
+
+    return render_template('guest.html', form=form)
+
+
 @app.route('/booking', methods=['GET', 'POST'])
 def booking():
-    room_form = RoomForm()
-    rooms = Room.query.order_by("id").all()
-    room_form.type.choices = [(room.id, room.detail) for room in rooms]
-    guest_form = GuestForm()
-    booking_form = BookingForm()
-
-    if booking_form.validate_on_submit():
-        new_guest = Guest(name=guest_form.guest_name.data, contact=guest_form.contact_info.data)
+    form = BookingForm()
+    if form.validate_on_submit():
+        days = (form.check_out_date.data - form.check_in_date.data).days
+        price = Room.query.filter_by(id=request.args.get('room_id')).first().price_per_day
+        new_guest = Guest(name=request.args.get('guest_name'), contact=request.args.get('contact_info'))
         db.session.add(new_guest)
         db.session.flush()
 
-        days = (booking_form.check_out_date.data - booking_form.check_in_date.data).days
-        price = Room.query.filter_by(id=room_form.type.data).first().price_per_day
         new_booking = Booking(
             guest_id=new_guest.id,
-            room_id=room_form.type.data,
-            check_in_date=booking_form.check_in_date.data,
-            check_out_date=booking_form.check_out_date.data,
-            detail=booking_form.detail.data,
+            room_id=request.args.get('room_id'),
+            check_in_date=form.check_in_date.data,
+            check_out_date=form.check_out_date.data,
             amount=price * days
         )
         db.session.add(new_booking)
@@ -92,7 +109,7 @@ def booking():
 
         return redirect(url_for('index'))
 
-    return render_template('booking.html', room_form=room_form, guest_form=guest_form, booking_form=booking_form)
+    return render_template('booking.html', form=form)
 
 
 if __name__ == '__main__':
